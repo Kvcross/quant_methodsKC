@@ -1,0 +1,65 @@
+---
+title: "Quant Methods_1"
+output: pdf_document
+---
+Hit tab over an argument to pull up some helpful information
+
+```{r}
+dat<-read.csv("./inflammation-01.csv", header= F)
+head(dat)
+#summary--shows us what the first 6 ross of the data say-columns= differnt point in time and rows are patients
+#To change the number of rows
+head(dat, 10)
+tail (dat)
+class(dat)
+#what is dat
+```
+R has some different classes-- dataframe() is one of the more common ones
+4 most common classes of objects= data.farme(), vector(), matix(), list(). Lists are most flexible
+
+Subsetting data-[row, column]
+```{r}
+dat[1,1]
+dim(dat) 
+# data dimensions- counting the rows and the columns
+dat[30, 20]
+```
+Splicing- taking a big chunk of the data= Ex: rows 1-10/ finding some basic stats for the different patients
+```{r}
+dat[ 1:4, 1:10]
+# we can also list what rows we are interested in- concatenate into a vector
+c(3,2,4)
+dat[c(3,8,37,56), c(10,14,29)]
+#all columns from row 5
+dat[5, ]
+#all rows from column 16
+dat[ ,16]
+patient_1<- dat[1, ]
+max(patient_1)
+summary(dat[ , 7])
+```
+Apply function- basic way to apply any function to some data frame- apply to rows or columns
+```{r}
+avg_patient_inflammation <- apply(dat, 1, mean)
+avg_day_inflammation <- apply(dat, 2, mean)
+#std deviation of day
+std_day_inflammation <- apply(dat, 2, sd)
+#std deviation of patients
+std_patient_inflammation <- apply(dat, 1, sd)
+#point test
+sd(dat[1,])
+```
+Plotting data
+```{r}
+plot(avg_day_inflammation)
+?pch
+# go back and look at PDF business
+plot(1:40, avg_day_inflammation, xlab='day', ylab='inflammation', frame.plot=F, col='magenta', pch=19, cex= 2, axes=F, main='Practice Plot')
+axis(side=1, cex.axos=3, lwd=4, padj=1.5)
+axis(side=2, cex.axos=3, lwd=4, padj=1.5)
+#commands for making types of files- need to put it somewhere- . = working directory
+#output a bunch of  figures- run PDF 
+
+
+```
+
