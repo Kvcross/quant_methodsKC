@@ -1,0 +1,82 @@
+---
+title: "Quant Methods Lecture 2"
+output: html_document
+---
+Programming for Repetetive tasks
+sapply()
+Doing things on the fly--cleaning your data- we do this with...
+For Loop- iterator (i) do somthing for some number of times
+i= 1 to 10
+{ do somthing}
+```{r}
+## For Loop- recreate sapply functionality
+# we need to create an iterator
+# this is an variable you wish
+# typically i
+for(i in 1:11) {
+    print(class(Prairie_dat[ , i]))
+}
+# lets capture the output
+dat_classes = NULL # (Null= completely empty- you can put anything into it)
+for(i in 1:11) {
+    dat_classes [i]= class(Prairie_dat[ , i])
+}
+# 4 spaces- line after for
+##alternatively you can concatenate
+dat_classes = NULL # (Null= completely empty- you can put anything into it)
+for(i in 1:11) {
+    dat_classes [i]= c(dat_classes, class(Prairie_dat[ , i]))
+}
+## Make your loops general
+dat_classes = NULL # (Null= completely empty- you can put anything into it)
+for(i in 1:ncol(Prairie_dat)) {
+    dat_classes [i]= class(Prairie_dat[ , i])
+}
+```
+
+If statements
+```{r}
+dat_classes = NULL
+for(i in 1:ncol(Prairie_dat)) {
+    dat_classes [i]= class(Prairie_dat[ , i])
+    if(dat_classes [i] == "integer") {
+       print('sweet!')
+    } 
+    else {
+      if(dat_classes[i] == 'factor') {
+        print ('ok')
+      }
+      else {
+        print('crap')
+      }
+    }
+ }
+```
+Putting this mess into a function
+```{r}
+eval_class = function(x) {
+  print ('ok')
+}
+# x is the argument- like in algebra f(x)- anything we are gonna input-like a data frame
+eval_class = function(x) {
+  dat_classes = NULL
+for(i in 1:ncol(x)) {
+    dat_classes [i]= class(x[ , i])
+    if(dat_classes [i] == "integer") {
+       print('sweet!')
+    } 
+    else {
+      if(dat_classes[i] == 'factor') {
+        print ('ok')
+      }
+      else {
+        print('crap')
+      }
+    }
+ }
+ return(x_classes)
+}
+
+ 
+```
+
