@@ -1,0 +1,130 @@
+---
+title: "Assignment 3"
+author: "Katie Beidler"
+date: "January 28, 2015"
+output: word_document
+---
+
+Univariate Assignment
+read in tree data
+metadata can be found in ./data/tree_metadata.txt
+
+```{r}
+trees = read.csv('treedata.csv')
+```
+1) Using the tree's dataset develop seperate models for the following species: "Acer rubrum", "Pinus strobus", "Abies fraseri." For each species which of the available explanatory variables seems to be most strongly correlated to the cover of that tree.
+```{r}
+## subsetting the data--------------------------------
+acer = subset(trees, subset = spcode == 'ACERRUB')
+pinus = subset(trees, subset = spcode == 'PINUSTR')
+aibes = subset(trees, subset = spcode == 'ABIEFRA')
+## Making Models for Acer rubrum (red maple) ----------
+# now to perform some simple linear regression models to determine which explanatory variables are significantly related to cover (abundance of red maple trees)
+acer_cover_v_elev = summary(lm(cover ~ elev, data = acer))
+acer_cover_v_tci = summary(lm(cover ~ tci, data = acer))
+acer_cover_v_streamdist = summary(lm (cover ~ streamdist, data = acer))
+acer_cover_v_disturb = summary(lm(cover ~ disturb, data = acer))
+acer_cover_v_beers = summary(lm(cover ~ beers, data = acer))
+```
+Of the explanatory variables: elevation, stream distance, disturbance and beers are significantly related to red maple tree cover- meaning that for each of these variables we reject the null that the slope is equal to 0. Beers seems to be most strongly related ( P< 0.01) - even though only 1.3% of the variability in cover is explained by its linear relationship with beers. 
+```{r}
+# now to fit a multiple linear regression model using the significnat variables noted above
+acer_mod1 = lm (cover ~ elev + streamdist + disturb + beers, data = acer)
+summary(acer_mod1)
+# it seems as though disturbance has become less important with the inclusion of the other variables- in model 2 we will leave out disturbance
+acer_mod2 = lm(cover ~ elev + streamdist + beers, data = acer)
+summary(acer_mod2)
+# the model now includes all signifcant terms and the adjusted R2 value went from 0.027 to 0.028- but does this make the model a better fit?
+AIC(acer_mod1)
+AIC(acer_mod2)
+```
+The AIC is lower for model 2 and the AICs differ by more than 2-- meaning that model 2 explains more variability in red maple tree cover.
+```{r}
+# now to test for colinearity or interactions among the explanatory variables
+acer_mod2 = lm(cover ~ elev + streamdist + beers, data = acer)
+acer_mod_full = update(acer_mod2, ~ . + elev*streamdist*beers)
+summary(acer_mod_full)
+# there seems to be a significant interaction between elevation and beers-- which makes sense given that the beers calculation depends on position on the mountain- better include this interaction in the model
+acer_mod2_inter = lm(cover ~ elev + streamdist + beers + elev:beers,  data = acer)
+summary(acer_mod2_inter)
+AIC(acer_mod2)
+AIC(acer_mod2_inter) # this seems to be the best model for red maple
+## Making Models for Pinus strobus (white pine) --------------------
+pinus_cover_v_elev = summary(lm(cover ~ elev, data = pinus))
+pinus_cover_v_tci = summary(lm(cover ~ tci, data = pinus))
+pinsu_cover_v_streamdist = summary(lm (cover ~ streamdist, data = pinus))
+pinus_cover_v_disturb = summary(lm(cover ~ disturb, data = pinus))
+pinus_cover_v_beers = summary(lm(cover ~ beers, data = pinus))
+```
+Of the explanatory variables: elevation, stream distance, disturbance and beers are significantly related to Fraser fir tree cover. Elevation, stream distance and beers seem to be most strongly related ( P< 0.001) - elevation explains ~29%, stream distance explains ~11%, and beers explains 12% of the variation in fir tree cover.
+```{r}
+# now to fit a multiple linear regression model using the significnat variables noted above
+pinus_mod1 = lm (cover ~ elev + streamdist + disturb, data = pinus)
+summary(pinus_mod1)
+# this model explains ~ 14% of the variability in cover, which is better than elevation alone.
+# now to test for colinearity or interactions among the explanatory variables
+pinus_mod1 = lm (cover ~ elev + streamdist + disturb, data = pinus)
+pinus_mod_full = update(pinus_mod1, ~ . + elev*streamdist*disturb)
+summary(pinus_mod_full)
+# no interactions- pinus_mod1 appears to be the best model
+## Making Models for Abies fraseri (Fraser fir) --------------------
+aibes_cover_v_elev = summary(lm(cover ~ elev, data = aibes))
+aibes_cover_v_tci = summary(lm(cover ~ tci, data = aibes))
+aibes_cover_v_streamdist = summary(lm (cover ~ streamdist, data = aibes))
+aibes_cover_v_disturb = summary(lm(cover ~ disturb, data = aibes))
+aibes_cover_v_beers = summary(lm(cover ~ beers, data = aibes))
+```
+Of the explanatory variables: elevation, stream distance and disturbance are significantly related to white pine tree cover. Elevation and stream distance seem to be most strongly related (P< 0.001) - elevation explains ~13% of the variation in tree cover and ~ 3.6% of the variability in cover is explained by stream distance.
+```{r}
+# now to fit a multiple linear regression model using the significnat variables noted above
+aibes_mod1 = lm (cover ~ elev + streamdist + disturb + beers, data = aibes)
+summary(aibes_mod1)
+# it seems as though disturbance has become less important with the inclusion of the other variables- in model 2 we will leave out disturbance
+aibes_mod2 = lm(cover ~ elev + streamdist + beers, data = aibes)
+summary(aibes_mod2)
+# now stream distance is no longer significant- let's leave it out and see what happens
+aibes_mod3 = lm(cover ~ elev + beers, data = aibes)
+summary(aibes_mod3)
+AIC(aibes_mod1)
+AIC(aibes_mod2)
+AIC(aibes_mod3)
+# both model 2 and 3 explain ~33% of the variability in tree cover- the AIC is lower for model 3, but only differs from model 2 by 1-- it is hard to say which is better, but models 2 & 3 are better than model 1.
+```
+2) From the tree data construct a new species richness variable wich summarizes how many unique species occur in each plot. Summarize this richness variable using the summary() function. Hint: the function tapply() could be helpful in this case.
+```{r}
+summary(as.numeric(table((trees$plotID))))
+# on average there are ~9.5 trees in each plot
+richness = tapply(trees$species, trees$plotID,function(x) length(unique(x)))
+# this should tell us how many unique species are in each plot
+summary(richness)
+# on average there are ~7.9 unique species in each plot
+```
+3) What kind of a variable is richness (continuous, discerte, categorical)?
+Species richness is a discrete variable (counts).
+
+4) For each of the unique plot id's extract the enviornmental information available for that plot
+```{r}
+plot_levels = unique(trees$plotID) 
+# 935 levels or 935 unique plot IDs
+dim(trees) 
+# 8971 rows- some plots are sampled more than once- as noted in the metadata 
+plot_duplicates_rm = subset(trees, !duplicated(plotID)) 
+# now the duplicate plot IDs should be removed and the subsetted data frame should have 935 rows
+dim(plot_duplicates_rm)
+#making a new data frame with the columns containing the env info and richness for each plot
+df <- data.frame(plotID=names(richness), richness =richness)
+rownames(df) <- NULL
+env_info = plot_duplicates_rm[ ,cbind(1,7,8,9,10,11,12,13)]
+rownames(env_info) <- NULL
+env_info_plots <- merge(env_info, df, by="plotID")
+```
+5) Construct a model of richness using the glm() function. Use the stepAIC() function to carry out a forward and also a backward stepwise selection of a best fitting model. Compare the results of this to the classic function step() Which model appears to be the best according to each approach? Why do you think this approach could be considered "dangerous" or potentially misleading?
+```{r}
+rich_glm = glm(richness ~ elev + disturb + beers + elev*disturb*beers, data = env_info_plots, family=poisson)
+summary(rich_glm)
+library(MASS)
+stepAIC(rich_glm, direction = "both")
+step(rich_glm)
+```
+According to both the the stepAIC() and step() approaches,  the model: richness ~ elev + disturb + beers + elev:disturb, is the best- although, I am not sure how the approaches differ. However, choosing models using this approach could be considrered dangerous or misleading. This approach may lead to overfitting. As the number of terms in the model increases, so does the variance explained by the model ( R2 gets closer to 1), but you may be modeling the random noise in your data set--diminishing the predictive power of your model. Multicollinearity can also be a problem, if predictor variables are correlated, it may be hard to say what is driving the effect on the response variable
+
